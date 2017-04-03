@@ -57,6 +57,8 @@ class Logger():
             self.remove_specific(self.date, self.mark)
         elif self.command == "remove-marked":
             self.remove_marked(self.mark)
+        elif self.command == "view-all":
+            self.view_all()
 
     #--------- commands ---------#
 
@@ -97,13 +99,20 @@ class Logger():
         """ View all entries with the given mark """
         entries = self.logfile.filter_entries(lambda e: e.mark == mark)
         if entries != []:
-            for e in entries:
-                print(e, "\n")
+            for e in entries: print(e)
         else:
             if mark == "":
                 print(f"There are no unmarked entries in the log.")
             else:
                 print(f"There are no entries with mark {mark} in the log.")
+
+    def view_all(self):
+        """ View all entries """
+        entries = self.logfile.all_entries()
+        if entries != []:
+            for e in entries: print(e)
+        else:
+            print("The log is empty")
 
     def remove_specific(self, date, mark):
         """ Remove an entry with given mark and date """

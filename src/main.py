@@ -31,6 +31,10 @@ def build_parser():
         help="View all marked entries. '--mark' option is ignored")
     view_marked_parser.add_argument("mark")
 
+    # 'view-all' command 
+    view_all_parser = subparsers.add_parser("view-all",
+        help="View all entries.")
+
     # 'remove' command
     remove_parser = subparsers.add_parser("remove", 
         help="Remove an entry with given date and mark")

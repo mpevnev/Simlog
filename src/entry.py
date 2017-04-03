@@ -29,7 +29,7 @@ class Entry():
     def __str__(self):
         date = self.date.strftime("%Y %b %d, %A")
         mark = "Not marked" if self.mark == "" else f"Marked: {self.mark}"
-        return f"-- {date} --\n-- {mark} --\n\n{self.contents}"
+        return f"-- {date} --\n-- {mark} --\n\n{self.contents}\n-- end --\n"
 
     def __lt__(self, other):
         return self.date < other.date
