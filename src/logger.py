@@ -19,11 +19,19 @@ class Logger():
         except KeyError:
             print("The logger requires EDITOR environment variable to be set.")
             raise ConfigError()
-        self.logdir = pathlib.Path.home() / ".logger"
+        self.logdir = pathlib.Path.home() / ".simlog"
         self.logfile = logfile.Logfile(self.logdir / "log")
         self.entryfile = self.logdir / "entry"
         self.command = args.command
-        self.args = args
+        self.mark = args.mark
+        if args.date is None:
+            self.date = datetime.date.today()
+        else:
+            self.date = parse_date(args.date)
+            if self.date is None:
+                print("Invalid date format. Please see 'simlog -h' for a list "
+                        + "of valid date formats.")
+                raise ConfigError()
 
     def ensure_files(self):
         """
@@ -39,15 +47,16 @@ class Logger():
 
     def run(self):
         """ Run the specified command """
-        mark = self.args.mark
         if self.command == "add":
-            self.add(mark=mark)
+            self.add(self.date, self.mark)
         elif self.command == "view":
-            self.view_specific(mark=mark)
+            self.view_specific(self.date, self.mark)
+        elif self.command == "view-marked":
+            self.view_marked(self.mark)
 
     #--------- specific commands ---------#
 
-    def add(self, date=None, mark=""):
+    def add(self, date, mark):
         """ Add an entry to the log """
         subprocess.run([self.editor, str(self.entryfile)])
         if not self.entryfile.exists():
@@ -59,18 +68,54 @@ class Logger():
             old_entry.merge(en)
             self.logfile.replace(old_entry)
         else:
-            self.logfile.prepend(en)
+            last = self.logfile.last_entry()
+            if last is None or last < en:
+                # the entry needs to be put in the head of the log
+                self.logfile.prepend(en)
+            else:
+                # the entry needs to be inserted between old entries
+                self.logfile.insert_by_date(en)
 
         os.remove(self.entryfile)
 
-    def view_specific(self, date=None, mark=""):
+    def view_specific(self, date, mark):
         """ View an entry with given mark and date """
-        date = date or datetime.date.today()
         en = self.logfile.find_specific(date, mark)
         if en is not None:
             print(en, "\n")
         else:
-            print(f"There are no entries with mark '{mark}' made on {date}.")
+            if mark != "":
+                print(f"There are no entries with mark '{mark}' made on {date}.")
+            else:
+                print(f"There are no entries with no mark made on {date}.")
+
+    def view_marked(self, mark):
+        """ View all entries with the given mark """
+        entries = self.logfile.filter_entries(lambda e: e.mark == mark)
+        if entries != []:
+            for e in entries:
+                print(e, "\n")
+        else:
+            if mark == "":
+                print(f"There are no unmarked entries in the log.")
+            else:
+                print(f"There are no entries with mark {mark} in the log.")
+
+#--------- helper functions ---------#
+
+def parse_date(string):
+    """ Return a date object from a given string, or None if parsing failed """
+    formats = [ "%Y-%m-%d"
+              , "%Y %m %d"
+              , "%Y-%b-%d"
+              , "%Y %b %d"
+              ]
+    for f in formats:
+        try:
+            return datetime.datetime.strptime(string, f).date()
+        except ValueError:
+            pass
+    return None
 
 #--------- errors ---------#
 

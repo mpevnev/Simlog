@@ -9,10 +9,15 @@ import argparse
 
 def build_parser():
     """ Construct a command line arguments' parser """
-    parser = argparse.ArgumentParser("logger")
-    parser.add_argument("--mark", dest="mark", 
-            help="Operate only on entries with given mark",
+    parser = argparse.ArgumentParser("simlog")
+    parser.add_argument("-m", "--mark", dest="mark", 
+            help="operate only on entries with given mark",
             default="")
+    parser.add_argument("-d", "--date", dest="date",
+            help="operate on entries with given date. Date can be in any of the \
+                    following formats: 'YYYY-MM-DD', 'YYYY MM DD', \
+                    'YYYY-Mon-DD', 'YYYY Mon DD'",
+            default=None)
     subparsers = parser.add_subparsers(help="Available commands", dest="command")
 
     # 'add' command
@@ -20,6 +25,11 @@ def build_parser():
 
     # 'view' command
     view_parser = subparsers.add_parser("view", help="View the log")
+
+    # 'view-marked' command
+    view_parser = subparsers.add_parser("view-marked", 
+            help="View all marked entries. '--mark' option is ignored")
+    view_parser.add_argument("mark")
 
     return parser
 
@@ -35,8 +45,6 @@ def main():
         print("Invalid configuration detected, terminating.")
     except logger.NoEntryError:
         print("Entry file was not created, nothing will be added to the log.")
-    except entry.EntryReadError:
-        print("Entry read from the log is malformed, terminating.")
 
 if __name__ == "__main__":
     main()

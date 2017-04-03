@@ -17,8 +17,9 @@ class Logfile():
 
     def prepend(self, e):
         """ Place the entry in the head of the file """
-        with self.path.open("wb+") as f:
+        with self.path.open("rb") as f:
             old = f.read()
+        with self.path.open("wb") as f:
             f.write(e.to_bytes())
             f.write(old)
 
@@ -31,6 +32,16 @@ class Logfile():
                     f.write(new_e.to_bytes())
                 else:
                     f.write(old_e.to_bytes())
+
+    def insert_by_date(self, new_e):
+        """ Insert the new entry in between old ones """
+        leave, shift = self.span(lambda e: e > new_e)
+        with self.path.open("wb") as f:
+            for old_e in leave:
+                f.write(old_e.to_bytes())
+            f.write(new_e.to_bytes())
+            for old_e in shift:
+                f.write(old_e.to_bytes())
 
     #--------- querying entries in bulk ---------#
 
@@ -53,6 +64,23 @@ class Logfile():
         """ Return a list of entries with given date and mark """
         return self.filter_entries(lambda e: e.date == date and e.mark == mark)
 
+    def span(self, predicate):
+        """
+        Split the log in two lists. First will contain the entries from the 
+        latest to the first for which predicate(entry) is False, the second 
+        will contain the rest.
+
+        It is analogous to the 'span' function from Haskell's Prelude.
+        """
+        i = 0
+        all_entries = self.all_entries()
+        for e in all_entries:
+            if predicate(e):
+                i += 1
+            else:
+                break
+        return all_entries[:i], all_entries[i:]
+
     #--------- querying entries one by one ---------#
 
     def find_entry(self, predicate):
@@ -71,3 +99,11 @@ class Logfile():
         not exist.
         """
         return self.find_entry(lambda e: e.date == date and e.mark == mark)
+
+    def last_entry(self):
+        """ Return the latest entry, or None if the log is empty """
+        with self.path.open("rb") as f:
+            try:
+                return entry.Entry.from_binary_file(f)
+            except entry.EntryReadError:
+                return None

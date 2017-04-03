@@ -27,9 +27,18 @@ class Entry():
         self.contents = contents
 
     def __str__(self):
-        date = self.date.isoformat()
+        date = self.date.strftime("%Y %b %d, %A")
         mark = "Not marked" if self.mark == "" else f"Marked: {self.mark}"
-        return f"-- {date}\n --{mark}\n\n{self.contents}"
+        return f"-- {date} --\n-- {mark} --\n\n{self.contents}"
+
+    def __lt__(self, other):
+        return self.date < other.date
+
+    def __gt__(self, other):
+        return self.date > other.date
+
+    def __eq__(self, other):
+        return self.date == other.date
 
     def to_bytes(self):
         """ Convert an entry to a bytestring """
