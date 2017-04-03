@@ -43,6 +43,24 @@ class Logfile():
             for old_e in shift:
                 f.write(old_e.to_bytes())
 
+    #--------- removing entries from the log ---------#
+
+    def remove(self, date, mark):
+        """ Remove specific entry from the log """
+        all_entries = self.all_entries()
+        with self.path.open("wb") as f:
+            for e in all_entries:
+                if not (e.date == date and e.mark == mark):
+                    f.write(e.to_bytes())
+
+    def remove_several(self, predicate):
+        """ Remove all entries such that predicate(entry) is True """
+        all_entries = self.all_entries()
+        with self.path.open("wb") as f:
+            for e in all_entries:
+                if not predicate(e):
+                    f.write(e.to_bytes())
+
     #--------- querying entries in bulk ---------#
 
     def filter_entries(self, predicate):
@@ -66,8 +84,8 @@ class Logfile():
 
     def span(self, predicate):
         """
-        Split the log in two lists. First will contain the entries from the 
-        latest to the first for which predicate(entry) is False, the second 
+        Split the log in two lists. First will contain the entries from the
+        latest to the first for which predicate(entry) is False, the second
         will contain the rest.
 
         It is analogous to the 'span' function from Haskell's Prelude.

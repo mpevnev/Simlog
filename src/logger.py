@@ -53,8 +53,12 @@ class Logger():
             self.view_specific(self.date, self.mark)
         elif self.command == "view-marked":
             self.view_marked(self.mark)
+        elif self.command == "remove":
+            self.remove_specific(self.date, self.mark)
+        elif self.command == "remove-marked":
+            self.remove_marked(self.mark)
 
-    #--------- specific commands ---------#
+    #--------- commands ---------#
 
     def add(self, date, mark):
         """ Add an entry to the log """
@@ -101,11 +105,19 @@ class Logger():
             else:
                 print(f"There are no entries with mark {mark} in the log.")
 
+    def remove_specific(self, date, mark):
+        """ Remove an entry with given mark and date """
+        self.logfile.remove(date, mark)
+
+    def remove_marked(self, mark):
+        """ Remove all entries with given mark """
+        self.logfile.remove_several(lambda e: e.mark == mark)
+
 #--------- helper functions ---------#
 
 def parse_date(string):
     """ Return a date object from a given string, or None if parsing failed """
-    formats = [ "%Y-%m-%d"
+    formats = ["%Y-%m-%d"
               , "%Y %m %d"
               , "%Y-%b-%d"
               , "%Y %b %d"
