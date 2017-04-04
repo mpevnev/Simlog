@@ -90,7 +90,12 @@ class Logger():
 
     def add(self, date, mark):
         """ Add an entry to the log """
-        subprocess.run([self.editor, str(self.entryfile)])
+        try:
+            subprocess.run([self.editor, str(self.entryfile)])
+        except FileNotFoundError:
+            print(f"EDITOR is set to '{self.editor}', which doesn't appear to be"
+                + " a valid command.")
+            raise ConfigError()
         if not self.entryfile.exists():
             raise NoEntryError()
         date = date or datetime.date.today()
