@@ -3,7 +3,13 @@
 import entry
 
 class Logfile():
-    """ This class provides I/O to the log file """
+    """
+    This class provides I/O operations on the log file
+
+    All the methods that take 'before' and 'after' optional arguments will
+    operate only on entries made before or after their respective argument
+    values.
+    """
 
     def __init__(self, path):
         self.path = path
@@ -55,10 +61,10 @@ class Logfile():
 
     def remove_several(self, predicate, before=None, after=None):
         """ Remove all entries such that predicate(entry) is True """
-        all_entries = self.all_entries(before, after)
+        all_entries = self.all_entries()
         with self.path.open("wb") as f:
             for e in all_entries:
-                if not predicate(e):
+                if not (predicate(e) and before_after(e, before, after)):
                     f.write(e.to_bytes())
 
     #--------- querying entries in bulk ---------#
