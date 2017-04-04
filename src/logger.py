@@ -25,6 +25,7 @@ class Logger():
         self.entryfile = self.logdir / "entry"
         self.command = args.command
         self.mark = args.mark
+        self.reverse = args.reverse
         # parse '--date'
         if args.date is None:
             self.date = datetime.date.today()
@@ -128,6 +129,7 @@ class Logger():
         entries = self.logfile.filter_entries(lambda e: e.mark == mark,
                 self.before, self.after)
         if entries != []:
+            if self.reverse: entries.reverse()
             for e in entries:
                 print(e)
         else:
@@ -148,6 +150,7 @@ class Logger():
         """ View all entries """
         entries = self.logfile.all_entries(self.before, self.after)
         if entries != []:
+            if self.reverse: entries.reverse()
             for e in entries: print(e)
         else:
             if self.before is None and self.after is None:
@@ -172,6 +175,7 @@ class Logger():
         """ View all entries matching given regex """
         entries = self.logfile.grep(regex, self.before, self.after)
         if entries != []:
+            if self.reverse: entries.reverse()
             for e in entries: print(e)
         else:
             if self.before is None and self.after is None:
@@ -187,6 +191,7 @@ class Logger():
         """ View all entries with given mark matching given regex """
         entries = self.logfile.grep_marked(regex, mark)
         if entries != []:
+            if self.reverse: entries.reverse()
             for e in entries: print(e)
         else:
             if self.before is None and self.after is None:

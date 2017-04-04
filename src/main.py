@@ -26,6 +26,8 @@ def build_parser():
         help="operate on entries made after given date. Date formats are the \
             same as for '--date' option",
         default=None)
+    parser.add_argument("-r", "--reverse", dest="reverse", action="store_true",
+        help="print out entries in reverse order, from oldest to newest")
 
     subparsers = parser.add_subparsers(help="Available commands", dest="command")
 
