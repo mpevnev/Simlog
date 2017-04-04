@@ -18,6 +18,15 @@ def build_parser():
             following formats: 'YYYY-MM-DD', 'YYYY MM DD', \
             'YYYY-Mon-DD', 'YYYY Mon DD'",
         default=None)
+    parser.add_argument("-b", "--before", dest="before",
+        help="operate on entries made before given date. Date formats are the \
+            same as for '--date' option.",
+        default=None)
+    parser.add_argument("-a", "--after", dest="after",
+        help="operate on entries made after given date. Date formats are the \
+            same as for '--date' option",
+        default=None)
+
     subparsers = parser.add_subparsers(help="Available commands", dest="command")
 
     # 'add' command

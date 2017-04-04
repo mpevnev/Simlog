@@ -53,9 +53,9 @@ class Logfile():
                 if not (e.date == date and e.mark == mark):
                     f.write(e.to_bytes())
 
-    def remove_several(self, predicate):
+    def remove_several(self, predicate, before=None, after=None):
         """ Remove all entries such that predicate(entry) is True """
-        all_entries = self.all_entries()
+        all_entries = self.all_entries(before, after)
         with self.path.open("wb") as f:
             for e in all_entries:
                 if not predicate(e):
@@ -63,24 +63,26 @@ class Logfile():
 
     #--------- querying entries in bulk ---------#
 
-    def filter_entries(self, predicate):
+    def filter_entries(self, predicate, before=None, after=None):
         """ Return a list of entries such that predicate(entry) is True """
         res = []
         with self.path.open("rb") as f:
             while True:
                 try:
                     new = entry.Entry.from_binary_file(f)
-                    if predicate(new): res.append(new)
+                    if predicate(new) and before_after(new, before, after):
+                        res.append(new)
                 except entry.EntryReadError:
                     return res
 
-    def all_entries(self):
+    def all_entries(self, before=None, after=None):
         """ Return all the entries in the log """
-        return self.filter_entries(lambda e: True)
+        return self.filter_entries(lambda e: True, before, after)
 
-    def matching_entries(self, date, mark):
+    def matching_entries(self, date, mark, before=None, after=None):
         """ Return a list of entries with given date and mark """
-        return self.filter_entries(lambda e: e.date == date and e.mark == mark)
+        return self.filter_entries(lambda e: e.date == date and e.mark == mark,
+                before, after)
 
     def span(self, predicate):
         """
@@ -99,10 +101,11 @@ class Logfile():
                 break
         return all_entries[:i], all_entries[i:]
 
-    def grep(self, regex):
+    def grep(self, regex, before=None, after=None):
         """ Return all entries matching given regex """
         res = []
         for e in self.all_entries():
+            if not before_after(e, before, after): continue
             lines = e.contents.splitlines()
             single_line = " ".join(lines)
             if regex.match(single_line):
@@ -114,9 +117,9 @@ class Logfile():
                         break
         return res
 
-    def grep_marked(self, regex, mark):
+    def grep_marked(self, regex, mark, before=None, after=None):
         """ Return all entries with given mark matching given regex """
-        return list(filter(lambda e: e.mark == mark, self.grep(regex)))
+        return list(filter(lambda e: e.mark == mark, self.grep(regex, before, after)))
 
     #--------- querying entries one by one ---------#
 
@@ -144,3 +147,15 @@ class Logfile():
                 return entry.Entry.from_binary_file(f)
             except entry.EntryReadError:
                 return None
+
+#--------- helper functions ---------#
+
+def before_after(en, before, after):
+    """ Return True if the entry was made before given date or after given date """
+    if before is None and after is None:
+        return True
+    if before is not None and en.date < before:
+        return True
+    if after is not None and en.date > after:
+        return True
+    return False

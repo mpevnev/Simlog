@@ -25,13 +25,13 @@ class Logger():
         self.entryfile = self.logdir / "entry"
         self.command = args.command
         self.mark = args.mark
+        # parse '--date'
         if args.date is None:
             self.date = datetime.date.today()
         else:
             self.date = parse_date(args.date)
             if self.date is None:
-                print("Invalid date format. Please see 'simlog -h' for a list "
-                        + "of valid date formats.")
+                print(INVALID_DATE)
                 raise ConfigError()
         # compile regex if it is given
         try:
@@ -39,6 +39,23 @@ class Logger():
         except re.error as e:
             print(f"Error when parsing regex: {e.args[0]}.")
             raise ConfigError()
+        except AttributeError:
+            pass # if there's no regex field then we simply don't need it
+        # parse '--before' and '--after'
+        self.before, self.after = None, None
+        if args.before is not None and args.after is not None:
+            print("Can't use both '--after' and '--before'.")
+            raise ConfigError()
+        if args.before is not None:
+            self.before = parse_date(args.before)
+            if self.before is None:
+                print(INVALID_DATE)
+                raise ConfigError()
+        if args.after is not None:
+            self.after = parse_date(args.after)
+            if self.after is None:
+                print(INVALID_DATE)
+                raise ConfigError()
 
     def ensure_files(self):
         """
@@ -108,22 +125,39 @@ class Logger():
 
     def view_marked(self, mark):
         """ View all entries with the given mark """
-        entries = self.logfile.filter_entries(lambda e: e.mark == mark)
+        entries = self.logfile.filter_entries(lambda e: e.mark == mark,
+                self.before, self.after)
         if entries != []:
-            for e in entries: print(e)
+            for e in entries:
+                print(e)
         else:
             if mark == "":
-                print(f"There are no unmarked entries in the log.")
+                res = f"There are no unmarked entries"
             else:
-                print(f"There are no entries with mark {mark} in the log.")
+                res = f"There are no entries with mark {mark}"
+            if self.before is not None:
+                date = self.before.strftime("%Y %b %d")
+                res += f" made before {date}"
+            if self.after is not None:
+                date = self.after.strftime("%Y %b %d")
+                res += f" made after {date}"
+            res += " in the log."
+            print(res)
 
     def view_all(self):
         """ View all entries """
-        entries = self.logfile.all_entries()
+        entries = self.logfile.all_entries(self.before, self.after)
         if entries != []:
             for e in entries: print(e)
         else:
-            print("The log is empty")
+            if self.before is None and self.after is None:
+                print("The log is empty")
+            elif self.before is not None:
+                date = self.before.strftime("%Y %b %d")
+                print(f"There are no entries made before {date}.")
+            elif self.after is not None:
+                date = self.after.strftime("%Y %b %d")
+                print(f"There are no entries made after {date}.")
 
     def remove_specific(self, date, mark):
         """ Remove an entry with given mark and date """
@@ -131,15 +165,23 @@ class Logger():
 
     def remove_marked(self, mark):
         """ Remove all entries with given mark """
-        self.logfile.remove_several(lambda e: e.mark == mark)
+        self.logfile.remove_several(lambda e: e.mark == mark,
+                self.before, self.after)
 
     def grep(self, regex):
         """ View all entries matching given regex """
-        entries = self.logfile.grep(regex)
+        entries = self.logfile.grep(regex, self.before, self.after)
         if entries != []:
             for e in entries: print(e)
         else:
-            print("There are no entries matching this regular expression.")
+            if self.before is None and self.after is None:
+                print("There are no entries matching this regular expression.")
+            elif self.before is not None:
+                date = self.before.strftime("%Y %b %d")
+                print(f"No entry made before {date} matches this regex.")
+            elif self.after is not None:
+                date = self.after.strftime("%Y %b %d")
+                print(f"No entry made after {date} matches this regex.")
 
     def grep_marked(self, regex, mark):
         """ View all entries with given mark matching given regex """
@@ -147,7 +189,14 @@ class Logger():
         if entries != []:
             for e in entries: print(e)
         else:
-            print(f"No entry with mark {mark} matches this regular expression")
+            if self.before is None and self.after is None:
+                print(f"No entry with mark {mark} matches this regular expression.")
+            elif self.before is not None:
+                date = self.before.strftime("%Y %b %d")
+                print(f"No entry with mark {mark} made before {date} matches this regex.")
+            elif self.after is not None:
+                date = self.after.strftime("%Y %b %d")
+                print(f"No entry with mark {mark} made after {date} matches this regex.")
 
 #--------- helper functions ---------#
 
@@ -174,3 +223,8 @@ class ConfigError(Exception):
 class NoEntryError(Exception):
     """ An error raised if no 'entry' file was created by calling EDITOR """
     pass
+
+#--------- strings ---------#
+
+INVALID_DATE = "Invalid date format. Please see 'simlog -h' for a list of \
+        valid date formats."
