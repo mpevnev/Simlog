@@ -1,0 +1,50 @@
+Simlog - a simple logging utility.
+
+1. Capacities and limitations.
+
+This program is designed to make keeping track of fairly rare events (think
+installation of new software or tweaks to dotfiles) easy. It can't gracefully
+handle gigabytes long entries and doesn't differentiate entries made within
+same day. It can keep the log categorized by arbitrary user-supplied strings, 
+or 'marks'. It supports querying entries by date, by mark, by date
+semiinterval and by matching their contents against regular expressions.
+
+2. Usage
+
+Before using this program, make sure that EDITOR environment variable is set.
+The logger doesn't provide its own text-editing capabilities, using EDITOR 
+instead.
+
+Unless --reverse is specified, the commands that show several entries show
+them from the latest to oldest.
+
+All the commands that show multiple entries honor --before and --after
+options. If --before is specified, then only entries made before given date
+are shown. If --after is specified, then only entries made after given date
+are shown.
+
+Currently the logger supports following commands:
+
+1. add: add an entry to the log. If --date option is not used, use today's
+	date. If --mark option is not used, leave the entry unmarked.
+
+2. view: view an entry. If --date option is not used, show today's entry. If
+	--mark option is not used, search for unmarked entries.
+	
+3. view-marked MARK: view all entries with given mark. --date and --mark
+	options are ignored. Pass "" to view unmarked entries.
+
+4. view-all: view all entries. --date and --mark options are ignored.
+
+5. remove: remove an entry. If --date option is not used, use today's date. If
+	--mark option is not used, operate on unmarked entries.
+
+6. remove-marked MARK: remove all the entries with the given mark. This
+	command honors --before and --after options. --date and --mark options
+	are ignored.
+
+7. grep REGEX: show all entries which contents match REGEX. --date and --mark
+	options are ignored.
+
+8 grep-marked REGEX MARK: show all entries with given mark which contents
+	match REGEX. --date and --mark options are ignored.
