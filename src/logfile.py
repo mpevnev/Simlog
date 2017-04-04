@@ -23,9 +23,9 @@ class Logfile():
 
     def prepend(self, e):
         """ Place the entry in the head of the file """
-        with self.path.open("rb") as f:
+        with self.path.open("rb+") as f:
             old = f.read()
-        with self.path.open("wb") as f:
+            f.seek(0)
             f.write(e.to_bytes())
             f.write(old)
 
