@@ -157,11 +157,9 @@ class Logfile():
 #--------- helper functions ---------#
 
 def before_after(en, before, after):
-    """ Return True if the entry was made before given date or after given date """
-    if before is None and after is None:
-        return True
-    if before is not None and en.date < before:
-        return True
-    if after is not None and en.date > after:
-        return True
-    return False
+    """ Return True if the entry was made before given date and after given date """
+    if before is not None and en.date >= before: 
+        return False
+    if after is not None and en.date <= after:
+        return False
+    return True

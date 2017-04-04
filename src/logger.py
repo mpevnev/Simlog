@@ -44,9 +44,6 @@ class Logger():
             pass # if there's no regex field then we simply don't need it
         # parse '--before' and '--after'
         self.before, self.after = None, None
-        if args.before is not None and args.after is not None:
-            print("Can't use both '--after' and '--before'.")
-            raise ConfigError()
         if args.before is not None:
             self.before = parse_date(args.before)
             if self.before is None:
@@ -140,9 +137,13 @@ class Logger():
             if self.before is not None:
                 date = self.before.strftime("%Y %b %d")
                 res += f" made before {date}"
-            if self.after is not None:
-                date = self.after.strftime("%Y %b %d")
-                res += f" made after {date}"
+                if self.after is not None:
+                    date = self.after.strftime("%Y %b %d")
+                    res += f" and after {date}"
+            else:
+                if self.after is not None:
+                    date = self.after.strftime("%Y %b %d")
+                    res += f" made after {date}"
             res += " in the log."
             print(res)
 
@@ -155,12 +156,16 @@ class Logger():
         else:
             if self.before is None and self.after is None:
                 print("The log is empty")
-            elif self.before is not None:
+            elif self.before is not None and self.after is None:
                 date = self.before.strftime("%Y %b %d")
                 print(f"There are no entries made before {date}.")
-            elif self.after is not None:
+            elif self.after is not None and self.before is None:
                 date = self.after.strftime("%Y %b %d")
                 print(f"There are no entries made after {date}.")
+            else:
+                date1 = self.before.strftime("%Y %b %d")
+                date2 = self.after.strftime("%Y %b %d")
+                print(f"There are no entries made before {date1} and after {date2}.")
 
     def remove_specific(self, date, mark):
         """ Remove an entry with given mark and date """
@@ -180,12 +185,16 @@ class Logger():
         else:
             if self.before is None and self.after is None:
                 print("There are no entries matching this regular expression.")
-            elif self.before is not None:
+            elif self.before is not None and self.after is None:
                 date = self.before.strftime("%Y %b %d")
                 print(f"No entry made before {date} matches this regex.")
-            elif self.after is not None:
+            elif self.after is not None and self.before is None:
                 date = self.after.strftime("%Y %b %d")
                 print(f"No entry made after {date} matches this regex.")
+            else:
+                date1 = self.before.strftime("%Y %b %d")
+                date2 = self.after.strftime("%Y %b %d")
+                print(f"No entry made before {date1} and after {date2} matches this regex.")
 
     def grep_marked(self, regex, mark):
         """ View all entries with given mark matching given regex """
@@ -196,12 +205,17 @@ class Logger():
         else:
             if self.before is None and self.after is None:
                 print(f"No entry with mark {mark} matches this regular expression.")
-            elif self.before is not None:
+            elif self.before is not None and self.after is None:
                 date = self.before.strftime("%Y %b %d")
                 print(f"No entry with mark {mark} made before {date} matches this regex.")
-            elif self.after is not None:
+            elif self.after is not None and self.before is None:
                 date = self.after.strftime("%Y %b %d")
                 print(f"No entry with mark {mark} made after {date} matches this regex.")
+            else:
+                date1 = self.before.strftime("%Y %b %d")
+                date2 = self.after.strftime("%Y %b %d")
+                print(f"No entry with mark {mark} made before {date1} and after {date2} \
+                        matches this regex.")
 
 #--------- helper functions ---------#
 
