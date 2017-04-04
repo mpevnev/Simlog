@@ -3,6 +3,7 @@
 import datetime
 import os
 import pathlib
+import re
 import subprocess
 
 import entry
@@ -32,6 +33,12 @@ class Logger():
                 print("Invalid date format. Please see 'simlog -h' for a list "
                         + "of valid date formats.")
                 raise ConfigError()
+        # compile regex if it is given
+        try:
+            self.regex = re.compile(".*" + args.regex + ".*")
+        except re.error as e:
+            print(f"Error when parsing regex: {e.args[0]}.")
+            raise ConfigError()
 
     def ensure_files(self):
         """
@@ -59,6 +66,10 @@ class Logger():
             self.remove_marked(self.mark)
         elif self.command == "view-all":
             self.view_all()
+        elif self.command == "grep":
+            self.grep(self.regex)
+        elif self.command == "grep-marked":
+            self.grep_marked(self.regex, self.mark)
 
     #--------- commands ---------#
 
@@ -121,6 +132,22 @@ class Logger():
     def remove_marked(self, mark):
         """ Remove all entries with given mark """
         self.logfile.remove_several(lambda e: e.mark == mark)
+
+    def grep(self, regex):
+        """ View all entries matching given regex """
+        entries = self.logfile.grep(regex)
+        if entries != []:
+            for e in entries: print(e)
+        else:
+            print("There are no entries matching this regular expression.")
+
+    def grep_marked(self, regex, mark):
+        """ View all entries with given mark matching given regex """
+        entries = self.logfile.grep_marked(regex, mark)
+        if entries != []:
+            for e in entries: print(e)
+        else:
+            print(f"No entry with mark {mark} matches this regular expression")
 
 #--------- helper functions ---------#
 

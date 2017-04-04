@@ -44,6 +44,18 @@ def build_parser():
         help="Remove all the entries with given mark. '--mark' option is ignored")
     remove_marked_parser.add_argument("mark")
 
+    # 'grep' command
+    grep_parser = subparsers.add_parser("grep",
+        help="View all entries matching given regular expression")
+    grep_parser.add_argument("regex")
+
+    # 'grep-marked' command
+    grep_marked_parser = subparsers.add_parser("grep-marked",
+        help="View all entries with given mark that match given regex. \
+                '--mark' option is ignored")
+    grep_marked_parser.add_argument("regex")
+    grep_marked_parser.add_argument("mark")
+
     return parser
 
 def main():

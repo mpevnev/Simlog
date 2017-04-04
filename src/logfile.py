@@ -99,6 +99,25 @@ class Logfile():
                 break
         return all_entries[:i], all_entries[i:]
 
+    def grep(self, regex):
+        """ Return all entries matching given regex """
+        res = []
+        for e in self.all_entries():
+            lines = e.contents.splitlines()
+            single_line = " ".join(lines)
+            if regex.match(single_line):
+                res.append(e)
+            else:
+                for line in lines:
+                    if regex.match(line):
+                        res.append(e)
+                        break
+        return res
+
+    def grep_marked(self, regex, mark):
+        """ Return all entries with given mark matching given regex """
+        return list(filter(lambda e: e.mark == mark, self.grep(regex)))
+
     #--------- querying entries one by one ---------#
 
     def find_entry(self, predicate):
