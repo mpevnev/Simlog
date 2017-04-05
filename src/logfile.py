@@ -31,7 +31,7 @@ class Logfile():
 
     def replace(self, new_e):
         """ Replace the entry with the same date and mark as the given one """
-        all_entries = self.all_entries()
+        all_entries = list(self.all_entries())
         with self.path.open("wb") as f:
             for old_e in all_entries:
                 if new_e.match(old_e):
