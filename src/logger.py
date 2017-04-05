@@ -130,11 +130,14 @@ class Logger():
         """ View all entries with the given mark """
         entries = self.logfile.filter_entries(lambda e: e.mark == mark,
                 self.before, self.after)
-        if entries != []:
-            if self.reverse: entries.reverse()
-            for e in entries:
-                print(e)
-        else:
+        empty = True
+        if self.reverse:
+            entries = list(entries)
+            entries.reverse()
+        for e in entries:
+            print(e)
+            empty = False
+        if empty:
             if mark == "":
                 res = f"There are no unmarked entries"
             else:
@@ -155,10 +158,14 @@ class Logger():
     def view_all(self):
         """ View all entries """
         entries = self.logfile.all_entries(self.before, self.after)
-        if entries != []:
-            if self.reverse: entries.reverse()
-            for e in entries: print(e)
-        else:
+        empty = True
+        if self.reverse:
+            entries = list(entries)
+            entries.reverse()
+        for e in entries:
+            print(e)
+            empty = False
+        if empty:
             if self.before is None and self.after is None:
                 print("The log is empty")
             elif self.before is not None and self.after is None:
@@ -184,10 +191,14 @@ class Logger():
     def grep(self, regex):
         """ View all entries matching given regex """
         entries = self.logfile.grep(regex, self.before, self.after)
-        if entries != []:
-            if self.reverse: entries.reverse()
-            for e in entries: print(e)
-        else:
+        empty = True
+        if self.reverse:
+            entries = list(entries)
+            entries.reverse()
+        for e in entries:
+            print(e)
+            empty = False
+        if empty:
             if self.before is None and self.after is None:
                 print("There are no entries matching this regular expression.")
             elif self.before is not None and self.after is None:
@@ -204,10 +215,14 @@ class Logger():
     def grep_marked(self, regex, mark):
         """ View all entries with given mark matching given regex """
         entries = self.logfile.grep_marked(regex, mark)
-        if entries != []:
-            if self.reverse: entries.reverse()
-            for e in entries: print(e)
-        else:
+        empty = True
+        if self.reverse:
+            entries = list(entries)
+            entries.reverse()
+        for e in entries:
+            print(e)
+            empty = False
+        if empty:
             if self.before is None and self.after is None:
                 print(f"No entry with mark {mark} matches this regular expression.")
             elif self.before is not None and self.after is None:
@@ -250,5 +265,4 @@ class NoEntryError(Exception):
 
 #--------- strings ---------#
 
-INVALID_DATE = "Invalid date format. Please see 'simlog -h' for a list of \
-        valid date formats."
+INVALID_DATE = "Invalid date format. Please see 'simlog -h' for a list of valid date formats."

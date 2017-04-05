@@ -70,16 +70,15 @@ class Logfile():
     #--------- querying entries in bulk ---------#
 
     def filter_entries(self, predicate, before=None, after=None):
-        """ Return a list of entries such that predicate(entry) is True """
-        res = []
+        """ Return an iterator of entries such that predicate(entry) is True """
         with self.path.open("rb") as f:
             while True:
                 try:
                     new = entry.Entry.from_binary_file(f)
                     if predicate(new) and before_after(new, before, after):
-                        res.append(new)
+                        yield new
                 except entry.EntryReadError:
-                    return res
+                    break
 
     def all_entries(self, before=None, after=None):
         """ Return all the entries in the log """
@@ -108,24 +107,22 @@ class Logfile():
         return all_entries[:i], all_entries[i:]
 
     def grep(self, regex, before=None, after=None):
-        """ Return all entries matching given regex """
-        res = []
+        """ Return an iterator with all entries matching given regex """
         for e in self.all_entries():
             if not before_after(e, before, after): continue
             lines = e.contents.splitlines()
             single_line = " ".join(lines)
             if regex.match(single_line):
-                res.append(e)
+                yield e
             else:
                 for line in lines:
                     if regex.match(line):
-                        res.append(e)
+                        yield e
                         break
-        return res
 
     def grep_marked(self, regex, mark, before=None, after=None):
-        """ Return all entries with given mark matching given regex """
-        return list(filter(lambda e: e.mark == mark, self.grep(regex, before, after)))
+        """ Return an iterator with all entries with given mark matching given regex """
+        return filter(lambda e: e.mark == mark, self.grep(regex, before, after))
 
     #--------- querying entries one by one ---------#
 
@@ -157,8 +154,8 @@ class Logfile():
 #--------- helper functions ---------#
 
 def before_after(en, before, after):
-    """ Return True if the entry was made before given date and after given date """
-    if before is not None and en.date >= before: 
+    """ Return True if the entry was made within given interval """
+    if before is not None and en.date >= before:
         return False
     if after is not None and en.date <= after:
         return False
