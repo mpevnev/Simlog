@@ -4,6 +4,7 @@ import datetime
 import os
 import pathlib
 import re
+import sys
 import subprocess
 
 import entry
@@ -29,6 +30,7 @@ class Logger():
         self.no_marks = args.silent or args.no_marks
         self.no_dates = args.silent or args.no_dates
         self.no_ends = args.silent or args.no_ends
+        self.from_stdin = args.from_stdin
         # parse '--date'
         if args.date is None:
             self.date = datetime.date.today()
@@ -101,16 +103,26 @@ class Logger():
 
     def add(self, date, mark):
         """ Add an entry to the log """
-        try:
-            subprocess.run([self.editor, str(self.entryfile)])
-        except FileNotFoundError:
-            print(f"EDITOR is set to '{self.editor}', which doesn't appear to be"
-                + " a valid command.")
-            raise ConfigError()
-        if not self.entryfile.exists():
-            raise NoEntryError()
         date = date or datetime.date.today()
-        en = entry.Entry.from_text_file(self.entryfile, date, mark)
+        if not self.from_stdin:
+            # fire up EDITOR, collect created file
+            try:
+                subprocess.run([self.editor, str(self.entryfile)])
+            except FileNotFoundError:
+                print(f"EDITOR is set to '{self.editor}', which doesn't appear to be"
+                    + " a valid command.")
+                raise ConfigError()
+            if not self.entryfile.exists():
+                raise NoEntryError()
+            en = entry.Entry.from_text_file(self.entryfile, date, mark)
+        else:
+            # read entry's contents from stdin
+            contents = ""
+            while True:
+                new = sys.stdin.read()
+                contents += new
+                if new == "": break
+            en = entry.Entry(contents, date, mark)
         old_entry = self.logfile.find_specific(date, mark)
         if old_entry is not None:
             old_entry.merge(en)
@@ -123,8 +135,8 @@ class Logger():
             else:
                 # the entry needs to be inserted between old entries
                 self.logfile.insert_by_date(en)
-
-        os.remove(self.entryfile)
+        if not self.from_stdin:
+            os.remove(self.entryfile)
 
     def view_specific(self, date, mark):
         """ View an entry with given mark and date """

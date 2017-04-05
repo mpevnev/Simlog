@@ -35,6 +35,8 @@ def build_parser():
         help="don't print marks")
     parser.add_argument("--no-end-markers", dest="no_ends", action="store_true",
         help="don't print end markers")
+    parser.add_argument("--from-stdin", dest="from_stdin", action="store_true",
+        help="don't run EDITOR, receive entry's contents from stdin")
 
     subparsers = parser.add_subparsers(help="Available commands", dest="command")
 
