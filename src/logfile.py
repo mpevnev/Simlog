@@ -53,7 +53,7 @@ class Logfile():
 
     def remove(self, date, mark):
         """ Remove specific entry from the log """
-        all_entries = self.all_entries()
+        all_entries = list(self.all_entries())
         with self.path.open("wb") as f:
             for e in all_entries:
                 if not (e.date == date and e.mark == mark):
@@ -98,7 +98,7 @@ class Logfile():
         It is analogous to the 'span' function from Haskell's Prelude.
         """
         i = 0
-        all_entries = self.all_entries()
+        all_entries = list(self.all_entries())
         for e in all_entries:
             if predicate(e):
                 i += 1
