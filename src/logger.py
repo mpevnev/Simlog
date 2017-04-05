@@ -26,6 +26,9 @@ class Logger():
         self.command = args.command
         self.mark = args.mark
         self.reverse = args.reverse
+        self.no_marks = args.silent or args.no_marks
+        self.no_dates = args.silent or args.no_dates
+        self.no_ends = args.silent or args.no_ends
         # parse '--date'
         if args.date is None:
             self.date = datetime.date.today()
@@ -64,6 +67,14 @@ class Logger():
         self.logfile.ensure_existence()
         if self.entryfile.exists():
             os.remove(self.entryfile)
+
+    def print(self, en):
+        """ Apply formatting according to flags and print out the entry """
+        no_dates = self.no_dates
+        no_marks = self.no_marks
+        no_ends = self.no_ends
+        s = en.format(no_date=no_dates, no_mark=no_marks, no_end=no_ends)
+        print(s)
 
     #--------- central processing function ---------#
 
@@ -119,7 +130,7 @@ class Logger():
         """ View an entry with given mark and date """
         en = self.logfile.find_specific(date, mark)
         if en is not None:
-            print(en, "\n")
+            self.print(en)
         else:
             if mark != "":
                 print(f"There are no entries with mark '{mark}' made on {date}.")
@@ -135,7 +146,7 @@ class Logger():
             entries = list(entries)
             entries.reverse()
         for e in entries:
-            print(e)
+            self.print(e)
             empty = False
         if empty:
             if mark == "":
@@ -163,7 +174,7 @@ class Logger():
             entries = list(entries)
             entries.reverse()
         for e in entries:
-            print(e)
+            self.print(e)
             empty = False
         if empty:
             if self.before is None and self.after is None:
@@ -196,7 +207,7 @@ class Logger():
             entries = list(entries)
             entries.reverse()
         for e in entries:
-            print(e)
+            self.print(e)
             empty = False
         if empty:
             if self.before is None and self.after is None:
@@ -220,7 +231,7 @@ class Logger():
             entries = list(entries)
             entries.reverse()
         for e in entries:
-            print(e)
+            self.print(e)
             empty = False
         if empty:
             if self.before is None and self.after is None:

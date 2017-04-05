@@ -2,15 +2,14 @@
 
 """ Main module """
 
-import entry
-import logger
-
 import argparse
+
+import logger
 
 def build_parser():
     """ Construct a command line arguments' parser """
     parser = argparse.ArgumentParser("simlog")
-    parser.add_argument("-m", "--mark", dest="mark", 
+    parser.add_argument("-m", "--mark", dest="mark",
         help="operate only on entries with given mark",
         default="")
     parser.add_argument("-d", "--date", dest="date",
@@ -28,6 +27,14 @@ def build_parser():
         default=None)
     parser.add_argument("-r", "--reverse", dest="reverse", action="store_true",
         help="print out entries in reverse order, from oldest to newest")
+    parser.add_argument("-s", "--silent", dest="silent", action="store_true",
+        help="print just entries' contents without headers and end markers")
+    parser.add_argument("--no-dates", dest="no_dates", action="store_true",
+        help="don't print date headers")
+    parser.add_argument("--no-marks", dest="no_marks", action="store_true",
+        help="don't print marks")
+    parser.add_argument("--no-end-markers", dest="no_ends", action="store_true",
+        help="don't print end markers")
 
     subparsers = parser.add_subparsers(help="Available commands", dest="command")
 
@@ -38,16 +45,16 @@ def build_parser():
     view_parser = subparsers.add_parser("view", help="View the log")
 
     # 'view-marked' command
-    view_marked_parser = subparsers.add_parser("view-marked", 
+    view_marked_parser = subparsers.add_parser("view-marked",
         help="View all marked entries. '--mark' option is ignored")
     view_marked_parser.add_argument("mark")
 
-    # 'view-all' command 
+    # 'view-all' command
     view_all_parser = subparsers.add_parser("view-all",
         help="View all entries.")
 
     # 'remove' command
-    remove_parser = subparsers.add_parser("remove", 
+    remove_parser = subparsers.add_parser("remove",
         help="Remove an entry with given date and mark")
 
     # 'remove-marked' command
