@@ -61,7 +61,7 @@ class Logfile():
 
     def remove_several(self, predicate, before=None, after=None):
         """ Remove all entries such that predicate(entry) is True """
-        all_entries = self.all_entries()
+        all_entries = list(self.all_entries())
         with self.path.open("wb") as f:
             for e in all_entries:
                 if not (predicate(e) and before_after(e, before, after)):
