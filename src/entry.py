@@ -72,7 +72,9 @@ class Entry():
 
     def merge(self, other):
         """ Merge two entries """
-        self.contents = f"{self.contents}\n{other.contents}"
+        left = self.contents.strip()
+        right = other.contents.strip()
+        self.contents = f"{left}\n{right}"
 
     @classmethod
     def from_binary_file(cls, from_file):
