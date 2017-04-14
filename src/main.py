@@ -37,6 +37,9 @@ def build_parser():
         help="don't print end markers")
     parser.add_argument("--from-stdin", dest="from_stdin", action="store_true",
         help="don't run EDITOR, receive entry's contents from stdin")
+    parser.add_argument("--hide", dest="hide",
+        help="don't show entries with marks given in a comma-separated list",
+        default=None)
 
     subparsers = parser.add_subparsers(help="Available commands", dest="command")
 

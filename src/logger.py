@@ -59,6 +59,11 @@ class Logger():
             if self.after is None:
                 print(INVALID_DATE)
                 raise ConfigError()
+        # parse --hide
+        if args.hide is not None:
+            self.hide = args.hide.split(",")
+        else:
+            self.hide = []
 
     def ensure_files(self):
         """
@@ -186,7 +191,8 @@ class Logger():
             entries = list(entries)
             entries.reverse()
         for e in entries:
-            self.print(e)
+            if e.mark not in self.hide:
+                self.print(e)
             empty = False
         if empty:
             if self.before is None and self.after is None:
@@ -219,7 +225,8 @@ class Logger():
             entries = list(entries)
             entries.reverse()
         for e in entries:
-            self.print(e)
+            if e.mark not in self.hide:
+                self.print(e)
             empty = False
         if empty:
             if self.before is None and self.after is None:
