@@ -28,23 +28,26 @@ Currently the logger supports following commands:
 1. add: add an entry to the log. If --date option is not used, use today's
 	date. If --mark option is not used, leave the entry unmarked.
 
-2. view: view an entry. If --date option is not used, show today's entry. If
+2. edit: edit an existing entry. If no entry with given mark and date is found
+	it's the same as add command. --from-stdin option is ignored.
+
+3. view: view an entry. If --date option is not used, show today's entry. If
 	--mark option is not used, search for unmarked entries.
 	
-3. view-marked MARK: view all entries with given mark. --date and --mark
+4. view-marked MARK: view all entries with given mark. --date and --mark
 	options are ignored. Pass "" to view unmarked entries.
 
-4. view-all: view all entries. --date and --mark options are ignored.
+5. view-all: view all entries. --date and --mark options are ignored.
 
-5. remove: remove an entry. If --date option is not used, use today's date. If
+6. remove: remove an entry. If --date option is not used, use today's date. If
 	--mark option is not used, operate on unmarked entries.
 
-6. remove-marked MARK: remove all the entries with the given mark. This
+7. remove-marked MARK: remove all the entries with the given mark. This
 	command honors --before and --after options. --date and --mark options
 	are ignored.
 
-7. grep REGEX: show all entries which contents match REGEX. --date and --mark
+8. grep REGEX: show all entries which contents match REGEX. --date and --mark
 	options are ignored.
 
-8. grep-marked REGEX MARK: show all entries with given mark which contents
+9. grep-marked REGEX MARK: show all entries with given mark which contents
 	match REGEX. --date and --mark options are ignored.
