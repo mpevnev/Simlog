@@ -76,6 +76,11 @@ class Entry():
         right = other.contents.strip()
         self.contents = f"{left}\n{right}"
 
+    def to_text_file(self, filename, no_date=False, no_mark=False, no_end=False):
+        """ Dump the entry to a file. """
+        with filename.open("w") as f:
+            f.write(self.format(no_date, no_mark, no_end))
+
     @classmethod
     def from_binary_file(cls, from_file):
         """ Load an entry from a binary file """

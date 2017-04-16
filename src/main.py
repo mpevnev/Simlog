@@ -46,8 +46,13 @@ def build_parser():
     # 'add' command
     add_parser = subparsers.add_parser("add", help="Add an entry to the log")
 
+    # 'edit' command
+    edit_parser = subparsers.add_parser("edit", 
+        help="Edit an entry. If the entry with given date and mark doesn't exist " +
+            "it's equivalent to add command. --from-stdin option is ignored.")
+
     # 'view' command
-    view_parser = subparsers.add_parser("view", help="View the log")
+    view_parser = subparsers.add_parser("view", help="View an entry")
 
     # 'view-marked' command
     view_marked_parser = subparsers.add_parser("view-marked",

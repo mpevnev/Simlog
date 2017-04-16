@@ -89,6 +89,8 @@ class Logger():
         """ Run the specified command """
         if self.command == "add":
             self.add(self.date, self.mark)
+        elif self.command == "edit":
+            self.edit(self.date, self.mark)
         elif self.command == "view":
             self.view_specific(self.date, self.mark)
         elif self.command == "view-marked":
@@ -141,6 +143,24 @@ class Logger():
                 # the entry needs to be inserted between old entries
                 self.logfile.insert_by_date(en)
         if not self.from_stdin:
+            os.remove(self.entryfile)
+
+    def edit(self, date, mark):
+        """ Edit an entry """
+        date = date or datetime.date.today()
+        old_entry = self.logfile.find_specific(date, mark)
+        if old_entry is None:
+            self.add(date, mark)
+        else:
+            old_entry.to_text_file(self.entryfile, True, True, True)
+            try:
+                subprocess.run([self.editor, str(self.entryfile)])
+            except FileNotFoundError:
+                print(f"EDITOR is set to '{self.editor}', which doesn't appear to be"
+                    + " a valid command.")
+                raise ConfigError()
+            en = entry.Entry.from_text_file(self.entryfile, date, mark)
+            self.logfile.replace(en)
             os.remove(self.entryfile)
 
     def view_specific(self, date, mark):
